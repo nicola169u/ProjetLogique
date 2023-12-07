@@ -176,13 +176,36 @@ unifie([]) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% QUESTION 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-poids_ponderation1(clash, 4).
-poids_ponderation1(check, 4).
-poids_ponderation1(rename, 3).
-poids_ponderation1(simplify, 3).
-poids_ponderation1(orient, 2).
-poids_ponderation1(decompose, 1).
-poids_ponderation1(expand, 0).
+
+
+% Les poids pour choix_pondere_1 
+poids_ponderation(clash, 4, ponderation1).
+poids_ponderation(check, 4, ponderation1).
+poids_ponderation(rename, 3, ponderation1).
+poids_ponderation(simplify, 3, ponderation1).
+poids_ponderation(orient, 2, ponderation1).
+poids_ponderation(decompose, 1, ponderation1).
+poids_ponderation(expand, 0, ponderation1).
+
+
+% Les poids pour choix_pondere_2 
+poids_ponderation(clash, 4, ponderation2).
+poids_ponderation(check, 4, ponderation2).
+poids_ponderation(rename, 2, ponderation2).
+poids_ponderation(simplify, 1, ponderation2).
+poids_ponderation(orient, 3, ponderation2).
+poids_ponderation(decompose, 2, ponderation2).
+poids_ponderation(expand, 0, ponderation2).
+
+
+% Les poids pour choix_pondere_3
+poids_ponderation(clash, 4, ponderation3).
+poids_ponderation(check, 4, ponderation3).
+poids_ponderation(rename, 3, ponderation3).
+poids_ponderation(simplify, 3, ponderation3).
+poids_ponderation(orient, 2, ponderation3).
+poids_ponderation(decompose, 1, ponderation3).
+poids_ponderation(expand, 0, ponderation3).
 
 
 % Définition de Unifie
@@ -193,39 +216,57 @@ unifie([], Strat) :-
     !. % Condition d'arrêt
 
 unifie([E|P], choix_premier) :-
-    writeln("Utilisation de la stratégie choix_premier."),
     regles(E, R),
     reduit(R, E, P, Q),
     !,
     unifie(Q, choix_premier).
 
 unifie([E|P], choix_pondere_1) :- 
-    writeln("Utilisation de la stratégie choix pondere 1."),
     regles(E, R),
-    poids_max(P, Q, E, R, [], Ponderation),
+    poids_max(P, Q, E, R, [], ponderation1),
     !, 
     unifie(Q, choix_pondere_1).
 
 
-poids_max([F|P], Q, E, RegleE, Result, Ponderation) :-
-    meilleur_poids([E, F], X, Reste, Regle), 
+unifie([E|P], choix_pondere_2) :- 
+    regles(E, R), 
+    poids_max(P, Q, E, R, [], ponderation2),
     !,
-    poids_max(P, Q, X, Regle, [Reste|Result], Ponderation).
+    unifie(Q, choix_pondere_2).
 
-poids_max([], Q, E, R, L, _) :-
+
+unifie([E|P], choix_pondere_3) :- 
+    regles(E, R), 
+    poids_max(P, Q, E, R, [], ponderation3),
+    !,
+    unifie(Q, choix_pondere_3).
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%% Prédicats auxiliaires %%%%%%%%%%%%%%%%%%%
+
+
+poids_max([], Q, E, R, L, Ponderation) :-
     reduit(R, E, L, Q), 
     !.
 
+poids_max([F|P], Q, E, RegleE, Result, Ponderation) :-
+    meilleur_poids([E, F], X, Reste, Regle, Ponderation),
+    !,
+    poids_max(P, Q, X, Regle, [Reste|Result], Ponderation).
 
-poids(ponderation1, E, Poids, Regle) :-
+% Ajout du prédicat poids/4
+poids(Ponderation, E, Poids, Regle) :-
     regles(E, Regle),
-    poids_ponderation1(Regle, Poids).
+    poids_ponderation(Regle, Poids, Ponderation).
 
 
 
-meilleur_poids([E, F], X, Reste, Regle) :-
-    ponderation(ponderation1, E, PoidsE, RegleE),
-    ponderation(ponderation1, F, PoidsF, RegleF),
+meilleur_poids([E, F], X, Reste, Regle, Ponderation) :-
+    poids(Ponderation, E, PoidsE, RegleE),
+    poids(Ponderation, F, PoidsF, RegleF),
     (PoidsE > PoidsF -> (X = E, Reste = F, Regle = RegleE); (X = F, Reste = E, Regle = RegleF)).
 
 
