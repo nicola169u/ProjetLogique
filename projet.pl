@@ -176,9 +176,20 @@ unifie([]) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% QUESTION 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+poids_ponderation1(clash, 4).
+poids_ponderation1(check, 4).
+poids_ponderation1(rename, 3).
+poids_ponderation1(simplify, 3).
+poids_ponderation1(orient, 2).
+poids_ponderation1(decompose, 1).
+poids_ponderation1(expand, 0).
+
+
 % Définition de Unifie
-unifie([], _) :- 
-    writeln("on est good pour le choix premier"),
+unifie([], Strat) :- 
+    write("on est good pour la stratégie "),
+    write(Strat),
+    writeln("."),
     !. % Condition d'arrêt
 
 unifie([E|P], choix_premier) :-
@@ -187,6 +198,39 @@ unifie([E|P], choix_premier) :-
     reduit(R, E, P, Q),
     !,
     unifie(Q, choix_premier).
+
+unifie([E|P], choix_pondere_1) :- 
+    writeln("Utilisation de la stratégie choix pondere 1."),
+    regles(E, R),
+    poids_max(P, Q, E, R, [], Ponderation),
+    !, 
+    unifie(Q, choix_pondere_1).
+
+
+poids_max([F|P], Q, E, RegleE, Result, Ponderation) :-
+    meilleur_poids([E, F], X, Reste, Regle), 
+    !,
+    poids_max(P, Q, X, Regle, [Reste|Result], Ponderation).
+
+poids_max([], Q, E, R, L, _) :-
+    reduit(R, E, L, Q), 
+    !.
+
+
+poids(ponderation1, E, Poids, Regle) :-
+    regles(E, Regle),
+    poids_ponderation1(Regle, Poids).
+
+
+
+meilleur_poids([E, F], X, Reste, Regle) :-
+    ponderation(ponderation1, E, PoidsE, RegleE),
+    ponderation(ponderation1, F, PoidsF, RegleF),
+    (PoidsE > PoidsF -> (X = E, Reste = F, Regle = RegleE); (X = F, Reste = E, Regle = RegleF)).
+
+
+
+
 
 
 
