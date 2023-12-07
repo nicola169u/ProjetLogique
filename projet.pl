@@ -43,6 +43,19 @@ regles(E, expand) :-
     compound(T), 
     \+occur_check(X, T).
 
+
+
+% Défintion de la règle Check
+regles(E, check) :- 
+    arg(1, E, X),
+    arg(2, E, T),
+    \+X == T, 
+    var(X), 
+    compound(T), 
+    occur_check(X, T), 
+    !. 
+    
+
 regles(E, orient) :- 
     arg(1, E, X), 
     arg(2, E, T),
@@ -68,9 +81,11 @@ regles(E, clash) :-
     compound(T),
     functor(X, A, B),
     functor(T, C, D),
-    not(A==C, B == D),
+    \+ (A==C, B == D),
     !.
-    
+
+
+
 
 
 
@@ -156,8 +171,30 @@ unifie([E|P]) :-
     unifie(Q).
 
 unifie([]) :-
-    write("Systeme d'équation unifiable et unifié hehe."),
+    write("Systeme déquation unifiable et unifié hehe."),
     !.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% QUESTION 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Définition de Unifie
+unifie([], _) :- 
+    writeln("on est good pour le choix premier"),
+    !. % Condition d'arrêt
+
+unifie([E|P], choix_premier) :-
+    writeln("Utilisation de la stratégie choix_premier."),
+    regles(E, R),
+    reduit(R, E, P, Q),
+    !,
+    unifie(Q, choix_premier).
+
+
+
+
+
+
+
+
 
 
 
