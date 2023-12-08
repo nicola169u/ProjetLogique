@@ -45,11 +45,11 @@ regles(E, simplify) :-
 
 
 regles(E, expand) :- 
-    arg(1, E, X), 
-    arg(2, E, T),
-    var(X),
-    compound(T), 
-    \+occur_check(X, T).
+    arg(1, E, X),    % Récupère le premier argument de l'équation E dans la variable X
+    arg(2, E, T),    % Récupère le deuxième argument de l'équation E dans la variable T
+    var(X),          % vérifie que X est une variable
+    compound(T),     % vérifie que T n'est ni variable ni atomic
+    \+occur_check(X, T). 
 
 
 
@@ -82,15 +82,19 @@ regles(E, decompose) :-
 
 
 
-regles(E, clash) :- 
-    arg(1, E, X), 
-    arg(2, E, T),
-    compound(X), 
-    compound(T),
-    functor(X, A, B),
-    functor(T, C, D),
-    \+ (A==C, B == D),
-    !.
+% regles(E, clash) : Définit la règle clash pour l'équation E.
+% Cette règle est activée lorsque les termes composés X et T de l'équation E ont des
+% foncteurs différents ou des arités différentes.
+
+regles(E, clash) :-
+    arg(1, E, X),                 % Extraction du premier argument de l'équation E (X).
+    arg(2, E, T),                 % Extraction du deuxième argument de l'équation E (T).
+    compound(X), compound(T),     % Vérification que X et T sont des termes composés.
+    functor(X, A, B),              % Extraction du nom du foncteur et de l'arité pour X.
+    functor(T, C, D),              % Extraction du nom du foncteur et de l'arité pour T.
+    (\+ (A == C); \+ (B == D)),    % Vérification que les foncteurs ou les arités ne sont pas les mêmes.
+    !.                             % Arrête la recherche de solutions pour cette règle.
+
 
 
 
@@ -308,6 +312,14 @@ meilleur_poids([E, F], X, Reste, Regle, Ponderation) :-
 
 
 
+afficher_variables_finales(Systeme) :-
+    writeln("Résultat final :"),
+    afficher_variables_finales_rec(Systeme).
+
+afficher_variables_finales_rec([]).
+afficher_variables_finales_rec([Var ?= Value|P]) :-
+    writeln(Var = Value),
+    afficher_variables_finales_rec(P).
 
 
 
@@ -401,9 +413,11 @@ traiter_choix(Choix) :-
 
 traiter_affichage(Affichage, Systeme, 1) :-
     (Affichage = 'y' -> 
-        trace_unif(Systeme, choix_premier)
+        trace_unif(Systeme, choix_premier),
+        afficher_variables_finales(Systeme)
     ; 
-        unif(Systeme, choix_premier)). 
+        unif(Systeme, choix_premier),
+        afficher_variables_finales(Systeme)).
 
 
 
