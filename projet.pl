@@ -104,7 +104,9 @@ regles(E, clash) :-
 
 % Toute la partie pour le prédicat Réduit qui va transformer le système P en systeme Q par la règle R de l equation E
 
-reduit(check, _, _, _) :- !, fail.
+reduit(check, _, _, _) :- 
+    !, 
+    fail. 
 
 reduit(simplify, E, P, Q) :- 
     arg(1, E, X),
@@ -126,21 +128,33 @@ reduit(expand, E, P, Q) :-
     X = T, 
     Q = P.
 
+% Prédicat reduit/4 qui réduit une expression (E) en utilisant l'orientation.
 reduit(orient, E, P, Q) :- 
+    % Extrait le premier argument (X) du terme E.
     arg(1, E, X), 
+    % Extrait le deuxième argument (T) du terme E.
     arg(2, E, T),
-    append([X?=T], P , Q),
+    % Crée une nouvelle paire X?=T et l'ajoute à la liste P pour obtenir la liste Q.
+    append([X?=T], P, Q),
     !.
 
 
-% Définition de réduction de Decompose
+
+% Prédicat reduit/4 qui réduit une expression composée (E) en utilisant la décomposition et le remplacement.
 reduit(decompose, E, P, Q) :- 
+    % Extrait le premier argument (X) du terme E.
     arg(1, E, X),
+    % Extrait le deuxième argument (T) du terme E.
     arg(2, E, T),
+    % Décompose X en son nom et ses arguments en utilisant le prédicat decomposition_args/3.
     decomposition_args(X, _, Args1), 
+    % Décompose T en son nom et ses arguments en utilisant le prédicat decomposition_args/3.
     decomposition_args(T, _, Args2), 
+    % Remplace les arguments de X par ceux de T en utilisant le prédicat remplace/3.
     remplace(Args1, Args2, Result),
+    % Ajoute le résultat obtenu à la liste P pour obtenir la liste Q.
     append(Result, P, Q).
+
 
 reduit(clash, _, _, _) :-
     !, 
@@ -148,28 +162,54 @@ reduit(clash, _, _, _) :-
 
 
 
-remplace([], [], []).
-remplace([A|Args1], [B|Args2], [A ?= B | Temp]) :- remplace(Args1, Args2, Temp).
+% Predicat remplace/3 qui prend trois listes en entrée et remplace chaque élément
+% de la première liste par son équivalent dans la deuxième liste, en construisant
+% une troisième liste résultante.
+
+remplace([], [], []). % Cas de base : si les deux listes sont vides, la liste résultante est vide.
+
+remplace([A|Args1], [B|Args2], [A ?= B | Temp]) :-
+    % Règle récursive : remplace le premier élément de la première liste (A)
+    % par le premier élément de la deuxième liste (B) et ajoute cette substitution
+    % à la liste résultante (Temp).
+    remplace(Args1, Args2, Temp).
+
 
 
 % Définition de my_compound_args qui permet de renvoyer le nombre darguments aussi bien de a que de a() ou de a(X).
 
+% Prédicat decomposition_args/3 qui décompose un terme X en son nom (Name) et ses arguments (Args).
 decomposition_args(X, Name, Args) :- 
+    % Cas où X est atomique.
     atomic(X), 
+    % Obtient le nom et l'arité du terme X.
     functor(X, Name, Arity), 
+    % Vérifie que l'arité est supérieure à 0.
     Arity > 0, 
+    % Extrait les arguments du terme X en appelant le prédicat extract_args/3.
     extract_args(X, Arity, Args),
     !.
 
+% Deuxième règle de decomposition_args/3 : s'applique lorsque X est un terme composé.
 decomposition_args(X, Name, Args) :- 
+    % Vérifie si X est un terme composé.
     compound(X), 
+    % Obtient le nom (Name) et les arguments (Args) du terme composé X.
     compound_name_arguments(X, Name, Args).
 
+% Prédicat extract_args/3 qui extrait les arguments d'un terme.
+% Règle de base : si l'arité est 0, la liste des arguments est vide.
 extract_args(_, 0, []).
+
+% Règle récursive de extract_args/3 : extrait l'argument N du terme X et continue la récursion.
 extract_args(X, N, [Arg|Args]) :- 
+    % Extrait l'argument N du terme X.
     arg(N, X, Arg), 
+    % Décrémente N pour passer à l'argument suivant.
     N1 is N - 1, 
+    % Appelle récursivement extract_args/3 avec le nouvel argument.
     extract_args(X, N1, Args).
+
 
 
 
@@ -285,51 +325,6 @@ unifie(P, choix_aleatoire) :-
     unifie(Q, choix_aleatoire).
 
 
-
-%%%%%%%%%%%%%%%%%%% Prédicats auxiliaires %%%%%%%%%%%%%%%%%%%
-
-
-poids_max([], Q, E, R, L, Ponderation) :-
-    reduit(R, E, L, Q), 
-    !.
-
-poids_max([F|P], Q, E, RegleE, Result, Ponderation) :-
-    meilleur_poids([E, F], X, Reste, Regle, Ponderation),
-    !,
-    poids_max(P, Q, X, Regle, [Reste|Result], Ponderation).
-
-% Ajout du prédicat poids/4
-poids(Ponderation, E, Poids, Regle) :-
-    regles(E, Regle),
-    poids_ponderation(Regle, Poids, Ponderation).
-
-
-
-meilleur_poids([E, F], X, Reste, Regle, Ponderation) :-
-    poids(Ponderation, E, PoidsE, RegleE),
-    poids(Ponderation, F, PoidsF, RegleF),
-    (PoidsE > PoidsF -> (X = E, Reste = F, Regle = RegleE); (X = F, Reste = E, Regle = RegleF)).
-
-
-
-afficher_variables_finales(Systeme) :-
-    writeln("Résultat final :"),
-    afficher_variables_finales_rec(Systeme).
-
-afficher_variables_finales_rec([]).
-afficher_variables_finales_rec([Var ?= Value|P]) :-
-    writeln(Var = Value),
-    afficher_variables_finales_rec(P).
-
-
-
-
-
-
-
-
-
-    
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% QUESTION 3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -394,7 +389,7 @@ traiter_choix(Choix) :-
         writeln('Entrez votre système d''équations à unifier (sous forme de liste, par exemple, [X ?= Y, Y ?= Z]):'),
         read(Systeme),
         writeln(Systeme),
-        writeln('Voulez-vous afficher le systeme et les règles à chaque itération de l\'unification ?'),
+        writeln('Voulez-vous afficher le systeme et les règles à chaque itération de l\'unification ?(y/n)'),
         read(Affichage),
         writeln("Quelle stratégie voulez-vous utiliser ?"),
         writeln("1. Choix premier"),
@@ -421,6 +416,55 @@ traiter_affichage(Affichage, Systeme, 1) :-
 
 
 
+
+
+%%%%%%%%%%%%%%%%%%% Prédicats auxiliaires %%%%%%%%%%%%%%%%%%%
+
+
+% Prédicat poids_max/6 pour calculer le poids maximum d'un ensemble d'expressions.
+poids_max([], Q, E, R, L, Ponderation) :-
+    % Utilise le prédicat reduit/4 pour réduire l'expression E avec la règle R et la liste L,
+    % puis assigne le résultat à la variable Q.
+    reduit(R, E, L, Q),
+    !.
+
+% Règle récursive de poids_max/6 pour traiter chaque élément de la liste de poids.
+poids_max([F|P], Q, E, RegleE, Result, Ponderation) :-
+    % Utilise le prédicat meilleur_poids/5 pour obtenir la meilleure paire d'expressions.
+    meilleur_poids([E, F], X, Reste, Regle, Ponderation),
+    !,
+    % Appelle récursivement poids_max/6 avec le reste de la liste de poids.
+    poids_max(P, Q, X, Regle, [Reste|Result], Ponderation).
+
+% Ajout du prédicat poids/4 pour calculer le poids d'une expression avec une pondération.
+poids(Ponderation, E, Poids, Regle) :-
+    % Obtient la règle associée à l'expression E.
+    regles(E, Regle),
+    % Calcule le poids de l'expression en utilisant la pondération spécifiée.
+    poids_ponderation(Regle, Poids, Ponderation).
+
+% Prédicat meilleur_poids/5 pour trouver la meilleure paire d'expressions par rapport à leur poids.
+meilleur_poids([E, F], X, Reste, Regle, Ponderation) :-
+    % Calcule le poids de chaque expression en utilisant la pondération spécifiée.
+    poids(Ponderation, E, PoidsE, RegleE),
+    poids(Ponderation, F, PoidsF, RegleF),
+    % Compare les poids pour déterminer la meilleure paire d'expressions.
+    (PoidsE > PoidsF -> (X = E, Reste = F, Regle = RegleE); (X = F, Reste = E, Regle = RegleF)).
+
+% Prédicat afficher_variables_finales/1 pour afficher le résultat final.
+afficher_variables_finales(Systeme) :-
+    % Affiche un message indiquant que c'est le résultat final.
+    writeln("Résultat final :"),
+    % Appelle le prédicat auxiliaire afficher_variables_finales_rec/1 pour afficher les variables finales.
+    afficher_variables_finales_rec(Systeme).
+
+% Prédicat auxiliaire afficher_variables_finales_rec/1 pour afficher les variables finales récursivement.
+afficher_variables_finales_rec([]).
+afficher_variables_finales_rec([Var ?= Value|P]) :-
+    % Affiche la variable et sa valeur.
+    writeln(Var = Value),
+    % Appelle récursivement le prédicat avec le reste de la liste.
+    afficher_variables_finales_rec(P).
 
 
 
