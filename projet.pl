@@ -227,35 +227,32 @@ unifie([]) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% QUESTION 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+% Définition de ponderation_1 (clash, check > rename, simplify > orient > decompose > expand)
+poids_ponderation(ponderation1, E, 4, clash) :- regles(E, clash).
+poids_ponderation(ponderation1, E, 4, check) :- regles(E, check).
+poids_ponderation(ponderation1, E, 3, rename) :- regles(E, rename).
+poids_ponderation(ponderation1, E, 3, simplify) :- regles(E, simplify).
+poids_ponderation(ponderation1, E, 2, orient) :- regles(E, orient).
+poids_ponderation(ponderation1, E, 1, decompose) :- regles(E, decompose).
+poids_ponderation(ponderation1, E, 0, expand) :- regles(E, expand).
 
-% Les poids pour choix_pondere_1 
-poids_ponderation(clash, 4, ponderation1).
-poids_ponderation(check, 4, ponderation1).
-poids_ponderation(rename, 3, ponderation1).
-poids_ponderation(simplify, 3, ponderation1).
-poids_ponderation(orient, 2, ponderation1).
-poids_ponderation(decompose, 1, ponderation1).
-poids_ponderation(expand, 0, ponderation1).
+% Définition de ponderation_2 (clash, check > orient > decompose > rename, simplify > expand)
+poids_ponderation(ponderation2, E, 4, clash) :- regles(E, clash).
+poids_ponderation(ponderation2, E, 4, check) :- regles(E, check).
+poids_ponderation(ponderation2, E, 3, orient) :- regles(E, orient).
+poids_ponderation(ponderation2, E, 2, decompose) :- regles(E, decompose).
+poids_ponderation(ponderation2, E, 2, rename) :- regles(E, rename).
+poids_ponderation(ponderation2, E, 1, simplify) :- rreglesegle(E, simplify).
+poids_ponderation(ponderation2, E, 0, expand) :- regles(E, expand).
 
-
-% Les poids pour choix_pondere_2 
-poids_ponderation(clash, 4, ponderation2).
-poids_ponderation(check, 4, ponderation2).
-poids_ponderation(rename, 2, ponderation2).
-poids_ponderation(simplify, 1, ponderation2).
-poids_ponderation(orient, 3, ponderation2).
-poids_ponderation(decompose, 2, ponderation2).
-poids_ponderation(expand, 0, ponderation2).
-
-
-% Les poids pour choix_pondere_3
-poids_ponderation(clash, 4, ponderation3).
-poids_ponderation(check, 4, ponderation3).
-poids_ponderation(rename, 0, ponderation3).
-poids_ponderation(simplify, 0, ponderation3).
-poids_ponderation(orient, 3, ponderation3).
-poids_ponderation(decompose, 2, ponderation3).
-poids_ponderation(expand, 1, ponderation3).
+% Définition de ponderation_3 (clash, check > orient > decompose > expand > rename, simplify)
+poids_ponderation(ponderation3, E, 4, clash) :- regles(E, clash).
+poids_ponderation(ponderation3, E, 4, check) :- regles(E, check).
+poids_ponderation(ponderation3, E, 3, orient) :- regles(E, orient).
+poids_ponderation(ponderation3, E, 2, decompose) :- regles(E, decompose).
+poids_ponderation(ponderation3, E, 1, expand) :- regles(E, expand).
+poids_ponderation(ponderation3, E, 0, rename) :- regles(E, rename).
+poids_ponderation(ponderation3, E, 0, simplify) :- regles(E, simplify).
 
 % Définition de Unifie
 unifie([], _) :- 
@@ -436,7 +433,7 @@ poids(Ponderation, E, Poids, Regle) :-
     % Obtient la règle associée à l'expression E.
     regles(E, Regle),
     % Calcule le poids de l'expression en utilisant la pondération spécifiée.
-    poids_ponderation(Regle, Poids, Ponderation).
+    poids_ponderation(Ponderation, E, Poids, Regle).
 
 % Prédicat meilleur_poids/5 pour trouver la meilleure paire d'expressions par rapport à leur poids.
 meilleur_poids([E, F], X, Reste, Regle, Ponderation) :-
@@ -445,6 +442,7 @@ meilleur_poids([E, F], X, Reste, Regle, Ponderation) :-
     poids(Ponderation, F, PoidsF, RegleF),
     % Compare les poids pour déterminer la meilleure paire d'expressions.
     (PoidsE > PoidsF -> (X = E, Reste = F, Regle = RegleE); (X = F, Reste = E, Regle = RegleF)).
+
 
 % Prédicat afficher_variables_finales/1 pour afficher le résultat final.
 afficher_variables_finales(Systeme) :-
