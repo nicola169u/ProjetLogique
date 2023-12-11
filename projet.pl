@@ -257,12 +257,9 @@ poids_ponderation(orient, 3, ponderation3).
 poids_ponderation(decompose, 2, ponderation3).
 poids_ponderation(expand, 1, ponderation3).
 
-
 % Définition de Unifie
-unifie([], Strat) :- 
-    write("on est good pour la stratégie "),
-    write(Strat),
-    writeln("."),
+unifie([], _) :- 
+    writeln("Unifiable"),
     !.
 
 unifie([E|P], choix_premier) :-
@@ -275,8 +272,8 @@ unifie([E|P], choix_premier) :-
 
 unifie([E|P], choix_pondere_1) :- 
     print_systeme([E|P]),
-    poids_max(P, Q, E, R, [], ponderation1),
     regles(E, R),
+    poids_max(P, Q, E, R, [], ponderation1),
     print_regles(R, E),
     !, 
     unifie(Q, choix_pondere_1).
@@ -284,8 +281,8 @@ unifie([E|P], choix_pondere_1) :-
 
 unifie([E|P], choix_pondere_2) :- 
     print_systeme([E|P]),
-    poids_max(P, Q, E, R, [], ponderation2),
     regles(E, R),
+    poids_max(P, Q, E, R, [], ponderation1),
     print_regles(R, E),
     !,
     unifie(Q, choix_pondere_2).
@@ -293,8 +290,8 @@ unifie([E|P], choix_pondere_2) :-
 
 unifie([E|P], choix_pondere_3) :- 
     print_systeme([E|P]),
-    poids_max(P, Q, E, R, [], ponderation3),
-    regles(E, R), 
+    regles(E, R),
+    poids_max(P, Q, E, R, [], ponderation1),
     print_regles(R, E),
     !,
     unifie(Q, choix_pondere_3).
