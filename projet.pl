@@ -253,11 +253,11 @@ poids_ponderation(expand, 0, ponderation2).
 % Les poids pour choix_pondere_3
 poids_ponderation(clash, 4, ponderation3).
 poids_ponderation(check, 4, ponderation3).
-poids_ponderation(rename, 3, ponderation3).
-poids_ponderation(simplify, 3, ponderation3).
-poids_ponderation(orient, 2, ponderation3).
-poids_ponderation(decompose, 1, ponderation3).
-poids_ponderation(expand, 0, ponderation3).
+poids_ponderation(rename, 0, ponderation3).
+poids_ponderation(simplify, 0, ponderation3).
+poids_ponderation(orient, 3, ponderation3).
+poids_ponderation(decompose, 2, ponderation3).
+poids_ponderation(expand, 1, ponderation3).
 
 
 % Définition de Unifie
