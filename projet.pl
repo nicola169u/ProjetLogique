@@ -92,7 +92,7 @@ regles(E, clash) :-
     compound(X), compound(T),     % Vérification que X et T sont des termes composés.
     functor(X, A, B),              % Extraction du nom du foncteur et de l'arité pour X.
     functor(T, C, D),              % Extraction du nom du foncteur et de l'arité pour T.
-    (\+ (A == C); \+ (B == D)),    % Vérification que les foncteurs ou les arités ne sont pas les mêmes.
+    not((A==C , B==D)),    % Vérification que les foncteurs ou les arités ne sont pas les mêmes.
     !.                             % Arrête la recherche de solutions pour cette règle.
 
 
@@ -105,7 +105,6 @@ regles(E, clash) :-
 % Toute la partie pour le prédicat Réduit qui va transformer le système P en systeme Q par la règle R de l equation E
 
 reduit(check, _, _, _) :- 
-    !, 
     fail. 
 
 reduit(simplify, E, P, Q) :- 
@@ -157,7 +156,6 @@ reduit(decompose, E, P, Q) :-
 
 
 reduit(clash, _, _, _) :-
-    !, 
     fail.
 
 
@@ -277,27 +275,27 @@ unifie([E|P], choix_premier) :-
 
 unifie([E|P], choix_pondere_1) :- 
     print_systeme([E|P]),
+    poids_max(P, Q, E, R, [], ponderation1),
     regles(E, R),
     print_regles(R, E),
-    poids_max(P, Q, E, R, [], ponderation1),
     !, 
     unifie(Q, choix_pondere_1).
 
 
 unifie([E|P], choix_pondere_2) :- 
     print_systeme([E|P]),
-    regles(E, R), 
-    print_regles(R, E),
     poids_max(P, Q, E, R, [], ponderation2),
+    regles(E, R),
+    print_regles(R, E),
     !,
     unifie(Q, choix_pondere_2).
 
 
 unifie([E|P], choix_pondere_3) :- 
     print_systeme([E|P]),
+    poids_max(P, Q, E, R, [], ponderation3),
     regles(E, R), 
     print_regles(R, E),
-    poids_max(P, Q, E, R, [], ponderation3),
     !,
     unifie(Q, choix_pondere_3).
 
